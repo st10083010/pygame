@@ -1,6 +1,7 @@
 # space shooting game
 
 import pygame
+import Rock
 
 FPS = 60
 TITLE = pygame.display.set_caption("game")  # 標題
@@ -20,19 +21,32 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)  # 引入預設函式
         self.image = pygame.Surface((50, 40))  # 玩家面積
         self.image.fill((0, 255, 0))  # 玩家顏色
+
         self.rect = self.image.get_rect()  # 定位
-        self.rect.center = (WIDTH/2, HEIGHT/2)  # 初始座標 左上角為(0, 0) 正中央寫法
+        self.rect.centerx = WIDTH/2  # 初始座標 左上角為(0, 0) 正中央寫法
+        self.rect.bottom = HEIGHT - 20
+
+        self.speedx = 10  # X 軸速度控制
 
     def update(self):
-        self.rect.y += 3
-        if self.rect.top > HEIGHT:
-            self.rect.bottom = 0
+        keyPressed = pygame.key.get_pressed()  # 回傳boolean值 當鍵盤有按鍵被按下去 回傳True
+        if keyPressed[pygame.K_RIGHT] or keyPressed[pygame.K_d]:  # 右鍵是否觸發(方向鍵)
+            self.rect.x += self.speedx
+        if keyPressed[pygame.K_LEFT] or keyPressed[pygame.K_a]:  # 左鍵是否觸發(方向鍵)
+            self.rect.x -= self.speedx
+
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
+        if self.rect.left < 0:
+            self.rect.left = 0
 
 
 allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會被一起控制
 player = Player()
 allSprites.add(player)
 
+rock = Rock.Rock()
+allSprites.add(rock)
 
 running = True
 
