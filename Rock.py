@@ -10,7 +10,7 @@ rockColor = (139, 90, 43)
 class Rock(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)  # 引入預設函式
-        self.image = pygame.Surface((30, 30))  # 石頭面積
+        self.image = pygame.Surface((40, 40))  # 石頭面積
         self.image.fill(rockColor)  # 石頭顏色
 
         self.rect = self.image.get_rect()  # 定位

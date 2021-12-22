@@ -1,6 +1,7 @@
 # space shooting game
 
 import pygame
+from pygame.constants import HAT_RIGHTUP
 import Rock
 import Bullet
 
@@ -10,8 +11,8 @@ TITLE = pygame.display.set_caption("game")  # 標題
 WIDTH = 800
 HEIGHT = 600
 
-backgroundColor = (200, 100, 50)
-playerColor = (0, 255, 0)
+BACKGROUND_COLOR = (0, 0, 0)
+PLAYER_COLOR = (0, 255, 0)
 
 
 pygame.init()  # 遊戲初始化
@@ -24,7 +25,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)  # 引入預設函式
         self.image = pygame.Surface((50, 40))  # 玩家面積
-        self.image.fill(playerColor)  # 玩家顏色
+        self.image.fill(PLAYER_COLOR)  # 玩家顏色
 
         self.rect = self.image.get_rect()  # 定位
         self.rect.centerx = WIDTH/2  # 初始座標 左上角為(0, 0) 正中央寫法
@@ -47,15 +48,20 @@ class Player(pygame.sprite.Sprite):
     def shoot(self):
         bullet = Bullet.Bullet(self.rect.centerx, self.rect.top)
         allSprites.add(bullet)
+        bulletsGroup.add(bullet)
 
 
 allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會被一起控制
+rocksGroup = pygame.sprite.Group()
+bulletsGroup = pygame.sprite.Group()
+
 player = Player()
 allSprites.add(player)
 
-for rocks in range(10):  # 石頭數量
+for rocks in range(6):  # 石頭數量
     r = Rock.Rock()
     allSprites.add(r)
+    rocksGroup.add(r)
 
 
 running = True
@@ -72,8 +78,19 @@ while running:
 
     # 更新遊戲
     allSprites.update()  # 執行allSprites中每個物件的update函式
+    hits = pygame.sprite.groupcollide(
+        rocksGroup, bulletsGroup, True, True)  # return dictionary
+    for hit in hits:
+        r = Rock.Rock()
+        allSprites.add(r)
+        rocksGroup.add(r)
+
+    isGameStop = pygame.sprite.spritecollide(
+        player, rocksGroup, False)  # 當參數1碰撞到參數2時，是否將參數2刪除
+    if isGameStop:  # 判斷是否有值，有值的時候將遊戲關閉
+        running = False
     # 畫面顯示
-    screen.fill(backgroundColor)  # RGB(tuple)
+    screen.fill(BACKGROUND_COLOR)  # RGB(tuple)
     allSprites.draw(screen)  # 把玩家畫到螢幕上
     pygame.display.update()
 
