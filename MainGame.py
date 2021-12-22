@@ -4,28 +4,36 @@ import pygame
 from pygame.constants import HAT_RIGHTUP
 import Rock
 import Bullet
+import os
 
 
 FPS = 60
-TITLE = pygame.display.set_caption("game")  # 標題
+
 WIDTH = 800
 HEIGHT = 600
 
 BACKGROUND_COLOR = (0, 0, 0)
 PLAYER_COLOR = (0, 255, 0)
+BLACK_LAYER = (0, 0, 0)
 
 
 pygame.init()  # 遊戲初始化
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # 解析度(視窗大小 tuple)
+pygame.display.set_caption("game")  # 標題
 clock = pygame.time.Clock()  # 對時間進行管理與操控
+
+backgroundImage = pygame.image.load(os.path.join(
+    "image", "background.png")).convert()  # 先初始化才能載入圖片 # convert()將圖片轉為PYGAME較容易讀取的格式
+playerImage = pygame.image.load(os.path.join("image", "player.png")).convert()
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)  # 引入預設函式
-        self.image = pygame.Surface((50, 40))  # 玩家面積
-        self.image.fill(PLAYER_COLOR)  # 玩家顏色
+        self.image = pygame.transform.scale(
+            playerImage, (50, 50))  # scale(圖片, (大小))
+        self.image.set_colorkey(BLACK_LAYER)  # set_colorkey(去除黑色部分)
 
         self.rect = self.image.get_rect()  # 定位
         self.rect.centerx = WIDTH/2  # 初始座標 左上角為(0, 0) 正中央寫法
@@ -91,6 +99,7 @@ while running:
         running = False
     # 畫面顯示
     screen.fill(BACKGROUND_COLOR)  # RGB(tuple)
+    screen.blit(backgroundImage, (0, 0))  # blit(畫的東西, 畫的位置)
     allSprites.draw(screen)  # 把玩家畫到螢幕上
     pygame.display.update()
 

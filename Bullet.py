@@ -1,9 +1,13 @@
 import pygame
+import os
 
 WIDTH = 800
 HEIGHT = 600
+BLACK_LAYER = (0, 0, 0)
+pygame.init()  # 遊戲初始化
 
 bulletColor = (255, 215, 0)
+bulletImage = pygame.image.load(os.path.join("image", "bullet.png")).convert()
 bulletSpeed = -10
 
 
