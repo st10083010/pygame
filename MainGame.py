@@ -2,6 +2,8 @@
 
 import pygame
 import Rock
+import Bullet
+
 
 FPS = 60
 TITLE = pygame.display.set_caption("game")  # 標題
@@ -9,6 +11,8 @@ WIDTH = 800
 HEIGHT = 600
 
 backgroundColor = (200, 100, 50)
+playerColor = (0, 255, 0)
+
 
 pygame.init()  # 遊戲初始化
 
@@ -20,7 +24,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)  # 引入預設函式
         self.image = pygame.Surface((50, 40))  # 玩家面積
-        self.image.fill((0, 255, 0))  # 玩家顏色
+        self.image.fill(playerColor)  # 玩家顏色
 
         self.rect = self.image.get_rect()  # 定位
         self.rect.centerx = WIDTH/2  # 初始座標 左上角為(0, 0) 正中央寫法
@@ -40,6 +44,10 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+    def shoot(self):
+        bullet = Bullet.Bullet(self.rect.centerx, self.rect.top)
+        allSprites.add(bullet)
+
 
 allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會被一起控制
 player = Player()
@@ -58,6 +66,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.shoot()
 
     # 更新遊戲
     allSprites.update()  # 執行allSprites中每個物件的update函式
