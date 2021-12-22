@@ -15,7 +15,12 @@ class Rock(pygame.sprite.Sprite):
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)  # 座標
         self.rect.y = random.randrange(-100, -40)
 
-        self.speedy = 5  # Y 軸速度控制
+        self.speedy = random.randrange(2, 10)  # Y 軸速度控制
 
     def update(self):
         self.rect.y += self.speedy
+
+        if self.rect.top > HEIGHT or self.rect.left > WIDTH or self.rect.right < 0:
+            self.rect.x = random.randrange(0, WIDTH - self.rect.width)  # 座標
+            self.rect.y = random.randrange(-100, -40)
+            self.speedy = random.randrange(2, 10)  # Y 軸速度控制

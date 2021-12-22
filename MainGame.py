@@ -45,8 +45,10 @@ allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會
 player = Player()
 allSprites.add(player)
 
-rock = Rock.Rock()
-allSprites.add(rock)
+for rocks in range(10):  # 石頭數量
+    r = Rock.Rock()
+    allSprites.add(r)
+
 
 running = True
 
