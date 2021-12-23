@@ -25,17 +25,23 @@ clock = pygame.time.Clock()  # 對時間進行管理與操控
 
 backgroundImage = pygame.image.load(os.path.join(
     "image", "background.png")).convert()  # 先初始化才能載入圖片 # convert()將圖片轉為PYGAME較容易讀取的格式
-playerImage = pygame.image.load(os.path.join("image", "player.png")).convert()
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)  # 引入預設函式
+        playerImage = pygame.image.load(
+            os.path.join("image", "player.png")).convert()
+
         self.image = pygame.transform.scale(
             playerImage, (50, 50))  # scale(圖片, (大小))
+
         self.image.set_colorkey(BLACK_LAYER)  # set_colorkey(去除黑色部分)
 
         self.rect = self.image.get_rect()  # 定位
+        self.redius = 30  # 碰撞圓面積半徑
+        pygame.draw.circle(self.image, PLAYER_COLOR,
+                           self.rect.center, self.redius)  # 將圖片畫出來(畫在哪，顏色，座標，半徑長)
         self.rect.centerx = WIDTH/2  # 初始座標 左上角為(0, 0) 正中央寫法
         self.rect.bottom = HEIGHT - 20
 
@@ -84,7 +90,7 @@ while running:
             if event.key == pygame.K_SPACE:
                 player.shoot()
 
-    # 更新遊戲
+    # 更新遊戲-------------------------------------------------
     allSprites.update()  # 執行allSprites中每個物件的update函式
     hits = pygame.sprite.groupcollide(
         rocksGroup, bulletsGroup, True, True)  # return dictionary
@@ -94,10 +100,10 @@ while running:
         rocksGroup.add(r)
 
     isGameStop = pygame.sprite.spritecollide(
-        player, rocksGroup, False)  # 當參數1碰撞到參數2時，是否將參數2刪除
+        player, rocksGroup, False, pygame.sprite.collide_circle)  # 當參數1碰撞到參數2時，是否將參數2刪除；參數4:預設碰撞面積為矩形
     if isGameStop:  # 判斷是否有值，有值的時候將遊戲關閉
         running = False
-    # 畫面顯示
+    # 畫面顯示------------------------------------------------
     screen.fill(BACKGROUND_COLOR)  # RGB(tuple)
     screen.blit(backgroundImage, (0, 0))  # blit(畫的東西, 畫的位置)
     allSprites.draw(screen)  # 把玩家畫到螢幕上
