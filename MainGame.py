@@ -5,6 +5,7 @@ from pygame.constants import HAT_RIGHTUP
 import Rock
 import Bullet
 import os
+import drawText
 
 
 FPS = 60
@@ -25,6 +26,9 @@ clock = pygame.time.Clock()  # 對時間進行管理與操控
 
 backgroundImage = pygame.image.load(os.path.join(
     "image", "background.png")).convert()  # 先初始化才能載入圖片 # convert()將圖片轉為PYGAME較容易讀取的格式
+
+
+score = 0
 
 
 class Player(pygame.sprite.Sprite):
@@ -72,6 +76,7 @@ bulletsGroup = pygame.sprite.Group()
 player = Player()
 allSprites.add(player)
 
+
 for rocks in range(6):  # 石頭數量
     r = Rock.Rock()
     allSprites.add(r)
@@ -95,6 +100,7 @@ while running:
     hits = pygame.sprite.groupcollide(
         rocksGroup, bulletsGroup, True, True)  # return dictionary
     for hit in hits:
+        score += hit.redius
         r = Rock.Rock()
         allSprites.add(r)
         rocksGroup.add(r)
@@ -108,6 +114,7 @@ while running:
     screen.fill(BACKGROUND_COLOR)  # RGB(tuple)
     screen.blit(backgroundImage, (0, 0))  # blit(畫的東西, 畫的位置)
     allSprites.draw(screen)  # 把玩家畫到螢幕上
+    drawText.draw_text(screen, str(score), 18, WIDTH/2, 10)  # 分數顯示
     pygame.display.update()
 
 
