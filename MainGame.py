@@ -126,7 +126,7 @@ while running:
     # exitGame = pygame.key.get_pressed() # or exitGame[pygame.K_ESCAPE]
     for damage in isGameStop:  # 判斷是否有值，有值的時候將遊戲關閉
         newRock()
-        player.health -= damage.radius
+        player.health -= (int(damage.radius) - 10)
         if player.health <= 0:
             running = False
     # 畫面顯示------------------------------------------------

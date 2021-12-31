@@ -5,7 +5,7 @@ fontName = pygame.font.match_font('arial')
 # pygame.font.match_font(字體名稱) 從電腦中尋找
 
 textColor = (255, 255, 255)
-currentHP = (0, 255, 0)
+currentHP_color = (0, 255, 0)
 
 
 def draw_text(surf, text, size, x, y):
@@ -33,5 +33,5 @@ def draw_health(surf, hp, x, y):
     # 白色外框
     fillRect = pygame.Rect(x, y, fill, HP_BAR_HIGHT)
     # 綠色矩形
-    pygame.draw.rect(surf, currentHP, fillRect)
+    pygame.draw.rect(surf, currentHP_color, fillRect)
     pygame.draw.rect(surf, textColor, outlineRect, 2)
