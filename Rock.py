@@ -7,8 +7,13 @@ WIDTH = 800
 HEIGHT = 600
 BLACK_LAYER = (0, 0, 0)
 
-
+pygame.mixer.init()  # 將音效模組初始化
 rockColor = (255, 90, 43)
+
+rockExplosionSound = [
+    pygame.mixer.Sound(os.path.join("sound", "expl0.wav")),
+    pygame.mixer.Sound(os.path.join("sound", "expl1.wav"))
+]
 
 
 class Rock(pygame.sprite.Sprite):
@@ -32,7 +37,7 @@ class Rock(pygame.sprite.Sprite):
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)  # 座標
         self.rect.y = random.randrange(-180, -100)
 
-        self.speedy = 1  # random.randrange(2, 10)  # Y 軸速度控制
+        self.speedy = random.randrange(2, 10)  # Y 軸速度控制
         self.totalDegress = 0  # 開始角度
         self.rotDegress = random.randrange(-5, 5, 2)  # 每次旋轉的角度
 

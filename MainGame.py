@@ -1,5 +1,6 @@
 # space shooting game
 
+import random
 import pygame
 from pygame.constants import HAT_RIGHTUP
 import Rock
@@ -19,14 +20,24 @@ BLACK_LAYER = (0, 0, 0)
 
 
 pygame.init()  # 遊戲初始化
+pygame.mixer.init()  # 將音效模組初始化
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # 解析度(視窗大小 tuple)
 pygame.display.set_caption("game")  # 標題
 clock = pygame.time.Clock()  # 對時間進行管理與操控
 
+# 圖片
 backgroundImage = pygame.image.load(os.path.join(
     "image", "background.png")).convert()  # 先初始化才能載入圖片 # convert()將圖片轉為PYGAME較容易讀取的格式
 
+# 音效
+shootSound = pygame.mixer.Sound(os.path.join(
+    "sound", "shoot.wav"))
+
+# 音樂
+pygame.mixer.music.load(os.path.join("sound", "background.ogg"))
+pygame.mixer.music.play(-1)  # play(播放幾次，-1 = 循環撥放)
+pygame.mixer.music.set_volume(0.5)  # set_volume(傳入0~1，音量大小)
 
 score = 0
 
@@ -67,6 +78,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet.Bullet(self.rect.centerx, self.rect.top)
         allSprites.add(bullet)
         bulletsGroup.add(bullet)
+        shootSound.play()
 
 
 allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會被一起控制
@@ -100,7 +112,9 @@ while running:
     hits = pygame.sprite.groupcollide(
         rocksGroup, bulletsGroup, True, True)  # return dictionary
     for hit in hits:
-        score += hit.redius
+        random.choice(Rock.rockExplosionSound).play()
+        score += int((hit.redius) + 10)  # 分數管理
+
         r = Rock.Rock()
         allSprites.add(r)
         rocksGroup.add(r)
@@ -114,7 +128,8 @@ while running:
     screen.fill(BACKGROUND_COLOR)  # RGB(tuple)
     screen.blit(backgroundImage, (0, 0))  # blit(畫的東西, 畫的位置)
     allSprites.draw(screen)  # 把玩家畫到螢幕上
-    drawText.draw_text(screen, str(score), 18, WIDTH/2, 10)  # 分數顯示
+    drawText.draw_text(screen, ("Score: " + str(score)),
+                       25, WIDTH/2, 10)  # 分數顯示
     pygame.display.update()
 
 
