@@ -40,8 +40,8 @@ class Player(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()  # 定位
         self.redius = 30  # 碰撞圓面積半徑
-        pygame.draw.circle(self.image, PLAYER_COLOR,
-                           self.rect.center, self.redius)  # 將圖片畫出來(畫在哪，顏色，座標，半徑長)
+        # pygame.draw.circle(self.image, PLAYER_COLOR,
+        #                    self.rect.center, self.redius)  # 將圖片畫出來(畫在哪，顏色，座標，半徑長)
         self.rect.centerx = WIDTH/2  # 初始座標 左上角為(0, 0) 正中央寫法
         self.rect.bottom = HEIGHT - 20
 
@@ -101,7 +101,8 @@ while running:
 
     isGameStop = pygame.sprite.spritecollide(
         player, rocksGroup, False, pygame.sprite.collide_circle)  # 當參數1碰撞到參數2時，是否將參數2刪除；參數4:預設碰撞面積為矩形
-    if isGameStop:  # 判斷是否有值，有值的時候將遊戲關閉
+    exitGame = pygame.key.get_pressed()
+    if isGameStop or exitGame[pygame.K_ESCAPE]:  # 判斷是否有值，有值的時候將遊戲關閉
         running = False
     # 畫面顯示------------------------------------------------
     screen.fill(BACKGROUND_COLOR)  # RGB(tuple)

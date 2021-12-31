@@ -6,4 +6,8 @@
 攻擊:
 空白鍵(space)
 
-備註: 飛船hitbox 太大
+離開遊戲:
+ESC
+
+已知BUG:
+飛船hitbox 太大
