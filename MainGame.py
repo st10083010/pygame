@@ -42,6 +42,12 @@ pygame.mixer.music.set_volume(0.5)  # set_volume(傳入0~1，音量大小)
 score = 0
 
 
+def newRock():
+    r = Rock.Rock()
+    allSprites.add(r)
+    rocksGroup.add(r)
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)  # 引入預設函式
@@ -61,6 +67,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT - 20
 
         self.speedx = 10  # X 軸速度控制
+        self.health = 100  # 血量
 
     def update(self):
         keyPressed = pygame.key.get_pressed()  # 回傳boolean值 當鍵盤有按鍵被按下去 回傳True
@@ -90,9 +97,7 @@ allSprites.add(player)
 
 
 for rocks in range(6):  # 石頭數量
-    r = Rock.Rock()
-    allSprites.add(r)
-    rocksGroup.add(r)
+    newRock()
 
 
 running = True
@@ -114,22 +119,23 @@ while running:
     for hit in hits:
         random.choice(Rock.rockExplosionSound).play()
         score += int((hit.redius) + 10)  # 分數管理
-
-        r = Rock.Rock()
-        allSprites.add(r)
-        rocksGroup.add(r)
+        newRock()
 
     isGameStop = pygame.sprite.spritecollide(
-        player, rocksGroup, False, pygame.sprite.collide_circle)  # 當參數1碰撞到參數2時，是否將參數2刪除；參數4:預設碰撞面積為矩形
-    exitGame = pygame.key.get_pressed()
-    if isGameStop or exitGame[pygame.K_ESCAPE]:  # 判斷是否有值，有值的時候將遊戲關閉
-        running = False
+        player, rocksGroup, True, pygame.sprite.collide_circle)  # 當參數1碰撞到參數2時，是否將參數2刪除；參數4:預設碰撞面積為矩形
+    # exitGame = pygame.key.get_pressed() # or exitGame[pygame.K_ESCAPE]
+    for damage in isGameStop:  # 判斷是否有值，有值的時候將遊戲關閉
+        newRock()
+        player.health -= damage.radius
+        if player.health <= 0:
+            running = False
     # 畫面顯示------------------------------------------------
     screen.fill(BACKGROUND_COLOR)  # RGB(tuple)
     screen.blit(backgroundImage, (0, 0))  # blit(畫的東西, 畫的位置)
     allSprites.draw(screen)  # 把玩家畫到螢幕上
     drawText.draw_text(screen, ("Score: " + str(score)),
                        25, WIDTH/2, 10)  # 分數顯示
+    drawText.draw_health(screen, player.health, 8, 15)
     pygame.display.update()
 
 
