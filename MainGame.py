@@ -8,6 +8,7 @@ import Bullet
 import os
 import drawText
 import Explosion
+import Items
 
 
 FPS = 60
@@ -34,18 +35,23 @@ backgroundImage = pygame.image.load(os.path.join(
 playerImage = pygame.image.load(
     os.path.join("image", "player.png")).convert()
 
+
 playerLivesIcon = pygame.transform.scale(playerImage, (25, 19))
 playerLivesIcon.set_colorkey(BLACK_LAYER)
 # 音效
 shootSound = pygame.mixer.Sound(os.path.join(
     "sound", "shoot.wav"))
+laserSound = pygame.mixer.Sound(os.path.join("sound", "pow0.wav"))
+shieldSound = pygame.mixer.Sound(os.path.join("sound", "pow1.wav"))
 
 # 音樂
 pygame.mixer.music.load(os.path.join("sound", "background.ogg"))
 pygame.mixer.music.play(-1)  # play(播放幾次，-1 = 循環撥放)
 pygame.mixer.music.set_volume(0.5)  # set_volume(傳入0~1，音量大小)
 
-score = 0
+score = 0  # 起始分數
+dropRate = 0.1  # 掉寶率
+shieldEffect = 20  # 護盾回血量
 
 
 def newRock():
@@ -69,13 +75,20 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT - 20
 
         self.speedx = 10  # X 軸速度控制
-        self.health = 100  # 血量
-        self.lives = 3  # 生命值
+        self.health = 100  # 最大血量
+        self.lives = 3  # 總生命值
         self.hidden = False  # 開局是否隱藏飛船
         self.hideTime = 0  # 隱藏時間
+        self.laser = 1  # 子彈等級
+        self.laserTime = 0  # 吃到閃電的時間
 
     def update(self):
-        if self.hidden and pygame.time.get_ticks() - self.hideTime > 3000:  # 3000毫秒
+        currently_time = pygame.time.get_ticks()
+        if self.laser > 1 and currently_time - self.laserTime > 5000:  # 5000毫秒
+            self.laser -= 1
+            self.laserTime = currently_time
+
+        if self.hidden and currently_time - self.hideTime > 3000:  # 3000毫秒
             # 經過一秒後將玩家(飛船)顯示出來)
             self.hidden = False
             self.rect.centerx = WIDTH/2  # 初始座標 左上角為(0, 0) 正中央寫法
@@ -94,20 +107,45 @@ class Player(pygame.sprite.Sprite):
 
     def shoot(self):
         if not(self.hidden):
-            bullet = Bullet.Bullet(self.rect.centerx, self.rect.top)
-            allSprites.add(bullet)
-            bulletsGroup.add(bullet)
-            shootSound.play()
+            if self.laser == 1:
+                bullet = Bullet.Bullet(self.rect.centerx, self.rect.top)
+                allSprites.add(bullet)
+                bulletsGroup.add(bullet)
+                shootSound.play()
+            elif self.laser == 2:
+                bullet1 = Bullet.Bullet(self.rect.left, self.rect.centery)
+                bullet2 = Bullet.Bullet(self.rect.right, self.rect.centery)
+                allSprites.add(bullet1)
+                allSprites.add(bullet2)
+                bulletsGroup.add(bullet1)
+                bulletsGroup.add(bullet2)
+                shootSound.play()
+            elif self.laser >= 3:
+                bullet1 = Bullet.Bullet(self.rect.left, self.rect.centery)
+                bullet2 = Bullet.Bullet(self.rect.right, self.rect.centery)
+                bullet3 = Bullet.Bullet(self.rect.centerx, self.rect.top)
+                allSprites.add(bullet1)
+                allSprites.add(bullet2)
+                allSprites.add(bullet3)
+                bulletsGroup.add(bullet1)
+                bulletsGroup.add(bullet2)
+                bulletsGroup.add(bullet3)
+                shootSound.play()
 
     def hide(self):
         self.hidden = True
         self.hideTime = pygame.time.get_ticks()
         self.rect.center = (WIDTH/2, HEIGHT+500)  # 將飛船移出視窗外
 
+    def laser_up(self):
+        self.laser += 1
+        self.laserTime = pygame.time.get_ticks()
+
 
 allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會被一起控制
 rocksGroup = pygame.sprite.Group()
 bulletsGroup = pygame.sprite.Group()
+itemsGroup = pygame.sprite.Group()
 
 player = Player()
 allSprites.add(player)
@@ -139,17 +177,24 @@ while running:
         expl = Explosion.Explosion(
             hit.rect.center, 'bigbooms')
         allSprites.add(expl)
+        if random.random() < dropRate:
+            itemsDrop = Items.Power(hit.rect.center)
+            allSprites.add(itemsDrop)
+            itemsGroup.add(itemsDrop)
+
         newRock()
 
-    isGameStop = pygame.sprite.spritecollide(
+    # 傷害判斷(石頭是否與飛船相撞)
+    isRockShip = pygame.sprite.spritecollide(
         player, rocksGroup, True, pygame.sprite.collide_circle)  # 當參數1碰撞到參數2時，是否將參數2刪除；參數4:預設碰撞面積為矩形
     # exitGame = pygame.key.get_pressed() # or exitGame[pygame.K_ESCAPE]
 
-    for damage in isGameStop:  # 判斷是否有值，有值的時候將遊戲關閉(傷害判定)
+    for damage in isRockShip:  # 判斷是否有值，有值的時候將遊戲關閉
         newRock()
         player.health -= (int(damage.radius) - 10)
         expl = Explosion.Explosion(damage.rect.center, 'smallbooms')
         allSprites.add(expl)
+
         if player.health <= 0:
             dieExplosion = Explosion.Explosion(player.rect.center, 'player')
             allSprites.add(dieExplosion)
@@ -158,9 +203,22 @@ while running:
             player.health = 100
             player.hide()  # 將玩家(飛船)短暫隱藏
 
+    # 道具判斷(道具是否與飛船相撞)
+    isItemShip = pygame.sprite.spritecollide(player, itemsGroup, True)
+    for bonus in isItemShip:
+        if bonus.type == 'shield':
+            player.health += shieldEffect
+            if player.health > 100:
+                player.health = 100
+            shieldSound.play()
+        elif bonus.type == 'laser_power':
+            player.laser_up()
+            laserSound.play()
+
     if player.lives == 0 and not(dieExplosion.alive()):
         # 當玩家生命值歸零且死亡動畫跑完時
         running = False
+
     # 畫面顯示------------------------------------------------
     screen.fill(BACKGROUND_COLOR)  # RGB(tuple)
     screen.blit(backgroundImage, (0, 0))  # blit(畫的東西, 畫的位置)
