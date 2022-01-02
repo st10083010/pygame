@@ -7,6 +7,7 @@ import Rock
 import Bullet
 import os
 import drawText
+import Explosion
 
 
 FPS = 60
@@ -119,14 +120,20 @@ while running:
     for hit in hits:
         random.choice(Rock.rockExplosionSound).play()
         score += int((hit.redius) + 10)  # 分數管理
+        expl = Explosion.Explosion(
+            hit.rect.center, 'bigbooms')
+        allSprites.add(expl)
         newRock()
 
     isGameStop = pygame.sprite.spritecollide(
         player, rocksGroup, True, pygame.sprite.collide_circle)  # 當參數1碰撞到參數2時，是否將參數2刪除；參數4:預設碰撞面積為矩形
     # exitGame = pygame.key.get_pressed() # or exitGame[pygame.K_ESCAPE]
+
     for damage in isGameStop:  # 判斷是否有值，有值的時候將遊戲關閉
         newRock()
         player.health -= (int(damage.radius) - 10)
+        expl = Explosion.Explosion(damage.rect.center, 'smallbooms')
+        allSprites.add(expl)
         if player.health <= 0:
             running = False
     # 畫面顯示------------------------------------------------
