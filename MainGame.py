@@ -20,12 +20,14 @@ BACKGROUND_COLOR = (0, 0, 0)
 PLAYER_COLOR = (0, 255, 0)
 BLACK_LAYER = (0, 0, 0)
 
+TITLE = "GAME"
+
 
 pygame.init()  # 遊戲初始化
 pygame.mixer.init()  # 將音效模組初始化
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # 解析度(視窗大小 tuple)
-pygame.display.set_caption("game")  # 標題
+pygame.display.set_caption(TITLE)  # 標題
 clock = pygame.time.Clock()  # 對時間進行管理與操控
 
 # 圖片
@@ -49,7 +51,7 @@ pygame.mixer.music.load(os.path.join("sound", "background.ogg"))
 pygame.mixer.music.play(-1)  # play(播放幾次，-1 = 循環撥放)
 pygame.mixer.music.set_volume(0.5)  # set_volume(傳入0~1，音量大小)
 
-score = 0  # 起始分數
+
 dropRate = 0.1  # 掉寶率
 shieldEffect = 20  # 護盾回血量
 
@@ -58,6 +60,36 @@ def newRock():
     r = Rock.Rock()
     allSprites.add(r)
     rocksGroup.add(r)
+
+
+def draw_mainMenu():
+    screen.blit(backgroundImage, (0, 0))  # blit(畫的東西, 畫的位置)
+    gameName = '太空生存戰'
+    controllText1 = "「←/→」或「A/D」: 控制左右移動"
+    controllText2 = "空白鍵(Space): 發射子彈"
+    how_to_start = "按任意鍵開始遊戲"
+    drawText.draw_text_forCHT(screen, gameName, 64,
+                              WIDTH/2, HEIGHT/4 - 30)
+    drawText.draw_text_forCHT(screen, controllText1, 30,
+                              WIDTH/2, HEIGHT/2)
+    drawText.draw_text_forCHT(screen, controllText2, 30,
+                              WIDTH/2, HEIGHT/2 - 45)
+    drawText.draw_text_forCHT(screen, how_to_start, 22,
+                              WIDTH/2, HEIGHT*3/4)
+    pygame.display.update()
+
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        # 1秒鐘之內最多被執行10次(FPS)
+
+        # 取得輸入
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            elif event.type == pygame.KEYUP:
+                # KEYDOWN -> 按下的瞬間觸發；KEYUP -> 按下後放開按鍵才觸發
+                waiting = False
 
 
 class Player(pygame.sprite.Sprite):
@@ -142,23 +174,28 @@ class Player(pygame.sprite.Sprite):
         self.laserTime = pygame.time.get_ticks()
 
 
-allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會被一起控制
-rocksGroup = pygame.sprite.Group()
-bulletsGroup = pygame.sprite.Group()
-itemsGroup = pygame.sprite.Group()
-
-player = Player()
-allSprites.add(player)
-
-
-for rocks in range(6):  # 石頭數量
-    newRock()
-
-
+mainMenu = True
+# game_over_screen = False
 running = True
 
 while running:
+    if mainMenu:
+        draw_mainMenu()
+        mainMenu = False
+        allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會被一起控制
+        rocksGroup = pygame.sprite.Group()
+        bulletsGroup = pygame.sprite.Group()
+        itemsGroup = pygame.sprite.Group()
+
+        score = 0  # 起始分數
+        player = Player()
+        allSprites.add(player)
+
+        for rocks in range(6):  # 石頭數量
+            newRock()
+
     clock.tick(FPS)  # 1秒鐘之內最多被執行10次(FPS)
+
     # 取得輸入
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -217,7 +254,7 @@ while running:
 
     if player.lives == 0 and not(dieExplosion.alive()):
         # 當玩家生命值歸零且死亡動畫跑完時
-        running = False
+        mainMenu = True
 
     # 畫面顯示------------------------------------------------
     screen.fill(BACKGROUND_COLOR)  # RGB(tuple)
