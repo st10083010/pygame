@@ -2,6 +2,10 @@ from math import ceil
 import pygame
 import os
 
+pygame.mixer.init()  # 將音效模組初始化
+
+dieSound = pygame.mixer.Sound(os.path.join(
+    "sound", "rumble.ogg"))
 
 BLACK_LAYER = (0, 0, 0)
 
@@ -13,16 +17,20 @@ class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
         pygame.sprite.Sprite.__init__(self)  # 引入預設函式
         global explosionAnimation
-        explosionAnimation = {'bigbooms': [], 'smallbooms': []}
+        explosionAnimation = {'bigbooms': [], 'smallbooms': [], 'player': []}
         for i in range(9):
             explosionIMG = pygame.image.load(os.path.join(
                 "image", "expl{}.png").format(i)).convert()
             explosionIMG.set_colorkey(BLACK_LAYER)
-
             explosionAnimation['bigbooms'].append(
                 pygame.transform.scale(explosionIMG, bigBoomSize))
             explosionAnimation["smallbooms"].append(
                 pygame.transform.scale(explosionIMG, smallBoomSize))
+
+            playerExplosionIMG = pygame.image.load(os.path.join(
+                "image", "player_expl{}.png").format(i)).convert()
+            playerExplosionIMG.set_colorkey(BLACK_LAYER)
+            explosionAnimation["player"].append(playerExplosionIMG)
 
     # 將圖片引入，寫個字典存放大/小爆炸的LIST，接著把圖片去背(?)，放入大/小爆炸的LIST
         self.size = size

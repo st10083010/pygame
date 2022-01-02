@@ -6,6 +6,8 @@ fontName = pygame.font.match_font('arial')
 
 textColor = (255, 255, 255)
 currentHP_color = (0, 255, 0)
+player_lives_icon_spacing = 30
+# 玩家生命值圖片的間距
 
 
 def draw_text(surf, text, size, x, y):
@@ -35,3 +37,12 @@ def draw_health(surf, hp, x, y):
     # 綠色矩形
     pygame.draw.rect(surf, currentHP_color, fillRect)
     pygame.draw.rect(surf, textColor, outlineRect, 2)
+
+
+def draw_lives(surf, lives, img, x, y):
+    for i in range(lives):
+        img_rect = img.get_rect()
+        img_rect.x = x + player_lives_icon_spacing*i
+        # 設定圖片與圖片的間距，避免重疊
+        img_rect.y = y
+        surf.blit(img, img_rect)

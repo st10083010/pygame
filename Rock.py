@@ -37,7 +37,7 @@ class Rock(pygame.sprite.Sprite):
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)  # 座標
         self.rect.y = random.randrange(-180, -100)
 
-        self.speedy = random.randrange(2, 10)  # Y 軸速度控制
+        self.speedy = random.randrange(2, 5)  # Y 軸速度控制
         self.totalDegress = 0  # 開始角度
         self.rotDegress = random.randrange(-5, 5, 2)  # 每次旋轉的角度
 

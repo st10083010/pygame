@@ -31,6 +31,11 @@ clock = pygame.time.Clock()  # 對時間進行管理與操控
 backgroundImage = pygame.image.load(os.path.join(
     "image", "background.png")).convert()  # 先初始化才能載入圖片 # convert()將圖片轉為PYGAME較容易讀取的格式
 
+playerImage = pygame.image.load(
+    os.path.join("image", "player.png")).convert()
+
+playerLivesIcon = pygame.transform.scale(playerImage, (25, 19))
+playerLivesIcon.set_colorkey(BLACK_LAYER)
 # 音效
 shootSound = pygame.mixer.Sound(os.path.join(
     "sound", "shoot.wav"))
@@ -52,14 +57,10 @@ def newRock():
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)  # 引入預設函式
-        playerImage = pygame.image.load(
-            os.path.join("image", "player.png")).convert()
 
         self.image = pygame.transform.scale(
             playerImage, (50, 50))  # scale(圖片, (大小))
-
         self.image.set_colorkey(BLACK_LAYER)  # set_colorkey(去除黑色部分)
-
         self.rect = self.image.get_rect()  # 定位
         self.redius = 30  # 碰撞圓面積半徑
         # pygame.draw.circle(self.image, PLAYER_COLOR,
@@ -69,8 +70,17 @@ class Player(pygame.sprite.Sprite):
 
         self.speedx = 10  # X 軸速度控制
         self.health = 100  # 血量
+        self.lives = 3  # 生命值
+        self.hidden = False  # 開局是否隱藏飛船
+        self.hideTime = 0  # 隱藏時間
 
     def update(self):
+        if self.hidden and pygame.time.get_ticks() - self.hideTime > 3000:  # 3000毫秒
+            # 經過一秒後將玩家(飛船)顯示出來)
+            self.hidden = False
+            self.rect.centerx = WIDTH/2  # 初始座標 左上角為(0, 0) 正中央寫法
+            self.rect.bottom = HEIGHT - 20
+
         keyPressed = pygame.key.get_pressed()  # 回傳boolean值 當鍵盤有按鍵被按下去 回傳True
         if keyPressed[pygame.K_RIGHT] or keyPressed[pygame.K_d]:  # 右鍵是否觸發(方向鍵)
             self.rect.x += self.speedx
@@ -83,10 +93,16 @@ class Player(pygame.sprite.Sprite):
             self.rect.left = 0
 
     def shoot(self):
-        bullet = Bullet.Bullet(self.rect.centerx, self.rect.top)
-        allSprites.add(bullet)
-        bulletsGroup.add(bullet)
-        shootSound.play()
+        if not(self.hidden):
+            bullet = Bullet.Bullet(self.rect.centerx, self.rect.top)
+            allSprites.add(bullet)
+            bulletsGroup.add(bullet)
+            shootSound.play()
+
+    def hide(self):
+        self.hidden = True
+        self.hideTime = pygame.time.get_ticks()
+        self.rect.center = (WIDTH/2, HEIGHT+500)  # 將飛船移出視窗外
 
 
 allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會被一起控制
@@ -129,13 +145,22 @@ while running:
         player, rocksGroup, True, pygame.sprite.collide_circle)  # 當參數1碰撞到參數2時，是否將參數2刪除；參數4:預設碰撞面積為矩形
     # exitGame = pygame.key.get_pressed() # or exitGame[pygame.K_ESCAPE]
 
-    for damage in isGameStop:  # 判斷是否有值，有值的時候將遊戲關閉
+    for damage in isGameStop:  # 判斷是否有值，有值的時候將遊戲關閉(傷害判定)
         newRock()
         player.health -= (int(damage.radius) - 10)
         expl = Explosion.Explosion(damage.rect.center, 'smallbooms')
         allSprites.add(expl)
         if player.health <= 0:
-            running = False
+            dieExplosion = Explosion.Explosion(player.rect.center, 'player')
+            allSprites.add(dieExplosion)
+            Explosion.dieSound.play()
+            player.lives -= 1
+            player.health = 100
+            player.hide()  # 將玩家(飛船)短暫隱藏
+
+    if player.lives == 0 and not(dieExplosion.alive()):
+        # 當玩家生命值歸零且死亡動畫跑完時
+        running = False
     # 畫面顯示------------------------------------------------
     screen.fill(BACKGROUND_COLOR)  # RGB(tuple)
     screen.blit(backgroundImage, (0, 0))  # blit(畫的東西, 畫的位置)
@@ -143,6 +168,7 @@ while running:
     drawText.draw_text(screen, ("Score: " + str(score)),
                        25, WIDTH/2, 10)  # 分數顯示
     drawText.draw_health(screen, player.health, 8, 15)
+    drawText.draw_lives(screen, player.lives, playerLivesIcon, WIDTH - 100, 15)
     pygame.display.update()
 
 
