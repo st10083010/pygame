@@ -37,9 +37,10 @@ backgroundImage = pygame.image.load(os.path.join(
 playerImage = pygame.image.load(
     os.path.join("image", "player.png")).convert()
 
-
 playerLivesIcon = pygame.transform.scale(playerImage, (25, 19))
 playerLivesIcon.set_colorkey(BLACK_LAYER)
+
+pygame.display.set_icon(playerLivesIcon)
 # 音效
 shootSound = pygame.mixer.Sound(os.path.join(
     "sound", "shoot.wav"))
@@ -87,9 +88,11 @@ def draw_mainMenu():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+                return True
             elif event.type == pygame.KEYUP:
                 # KEYDOWN -> 按下的瞬間觸發；KEYUP -> 按下後放開按鍵才觸發
                 waiting = False
+                return False
 
 
 class Player(pygame.sprite.Sprite):
@@ -180,7 +183,9 @@ running = True
 
 while running:
     if mainMenu:
-        draw_mainMenu()
+        iscolse = draw_mainMenu()
+        if iscolse == True:
+            break
         mainMenu = False
         allSprites = pygame.sprite.Group()  # 建立群組，群組內的物件通通會被一起控制
         rocksGroup = pygame.sprite.Group()
